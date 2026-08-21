@@ -16,14 +16,8 @@ class NotFoundException(AppException):
     def __init__(self, message: str = "Tài nguyên không tồn tại"):
         super().__init__(message, status.HTTP_404_NOT_FOUND)
 
-
-class UnauthorizedException(AppException):
-    def __init__(self, message: str = "Chưa xác thực hoặc token không hợp lệ"):
-        super().__init__(message, status.HTTP_401_UNAUTHORIZED)
-
-
 class ForbiddenException(AppException):
-    def __init__(self, message: str = "Bạn không có quyền truy cập"):
+    def __init__(self, message: str = "Không có quyền truy cập"):
         super().__init__(message, status.HTTP_403_FORBIDDEN)
 
 

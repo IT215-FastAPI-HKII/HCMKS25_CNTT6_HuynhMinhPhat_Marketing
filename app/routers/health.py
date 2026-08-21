@@ -16,7 +16,7 @@ def health_check(db: Session = Depends(get_db)):
     try:
         db.execute(text("SELECT 1"))
         return {
-            "success": True,
+            "success": "Thành công!",
             "message": "Hệ thống và Database đang hoạt động bình thường",
             "data": {
                 "status": "healthy",
