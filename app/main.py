@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from app.db.database import engine, Base
-from models.user import User
-from models.campaign import Campaign, CampaignMember, CampaignTask
+from app.models.user import User
+from app.models.campaign import Campaign, CampaignMember, CampaignTask
 
 from app.core.exceptions import AppException
 from app.routers.health import router as health_router
