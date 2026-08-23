@@ -6,6 +6,7 @@ from app.models.campaign import Campaign, CampaignMember, CampaignTask
 from app.core.exceptions import AppException, app_exception_handler, general_exception_handler
 from app.routers.health import router as health_router
 from app.routers.auth import router as auth_router
+from app.routers.protected import router as protected_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -20,3 +21,4 @@ app.add_exception_handler(Exception, general_exception_handler)
 
 app.include_router(health_router)
 app.include_router(auth_router)
+app.include_router(protected_router)

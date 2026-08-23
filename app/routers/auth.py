@@ -4,7 +4,10 @@ from app.schemas.user import UserCreate, UserResponse, TokenResponse, UserLogin
 from app.services.auth_service import register_user, login_user
 from app.db.database import get_db
 
-router = APIRouter(prefix="/auth", tags=["Auth"])
+router = APIRouter(
+    prefix="/auth", 
+    tags=["Auth"]
+)
 
 @router.post("/register", response_model=UserResponse)
 def register(payload: UserCreate, db: Session = Depends(get_db)):

@@ -33,7 +33,7 @@ def login_user(db: Session, payload: UserLogin) -> TokenResponse:
         raise BadRequestException("Sai mật khẩu")
     
     token_data = {
-        "sub": str(user.id),
+        "sub": str(user.email),
         "email": user.email,
         "role": user.role
     }
