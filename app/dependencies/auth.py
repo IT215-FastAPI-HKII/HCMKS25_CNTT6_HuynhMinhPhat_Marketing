@@ -8,7 +8,6 @@ from app.models.user import User
 from app.core.config import settings
 from app.core.exceptions import BadRequestException, NotFoundException, ForbiddenException
 
-# Sử dụng HTTPBearer để lấy token từ header
 reusable_oauth2 = HTTPBearer()
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(reusable_oauth2), db: Session = Depends(get_db)) -> User:
@@ -21,7 +20,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(r
             raise BadRequestException("Token không hợp lệ")
         
     except jwt.ExpiredSignatureError:
-        raise ForbiddenException("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!")
+        raise ForbiddenException("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!")
     
     except jwt.PyJWTError:
         raise BadRequestException("Không thể xác thực thông tin đăng nhập!")
@@ -32,6 +31,6 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(r
         raise NotFoundException("Người dùng không tồn tại trên hệ thống!")
 
     if not user.is_active:
-        raise BadRequestException("Tài khoản này đã bị tạm khóa!")
+        raise ForbiddenException("Tài khoản này đã bị tạm khóa!")
 
     return user
