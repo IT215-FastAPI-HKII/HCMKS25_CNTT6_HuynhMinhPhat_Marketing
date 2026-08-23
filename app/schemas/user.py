@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 class UserBase(BaseModel):
@@ -8,8 +8,8 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    password: str
-    role: str = "USER"
+    password: str = Field(..., min_length=6, max_length=50)
+    role: str = Field(default="USER")
 
 
 class UserLogin(BaseModel):
