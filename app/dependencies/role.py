@@ -1,4 +1,3 @@
-# app/founder/dependencies/role.py
 from fastapi import Depends
 from app.models.user import User
 from app.dependencies.auth import get_current_user

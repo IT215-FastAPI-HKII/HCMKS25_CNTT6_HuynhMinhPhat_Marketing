@@ -1,4 +1,3 @@
-# app/core/deps.py
 from fastapi import Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
