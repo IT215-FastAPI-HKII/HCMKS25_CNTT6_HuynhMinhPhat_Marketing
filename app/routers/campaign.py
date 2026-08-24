@@ -5,7 +5,7 @@ from app.db.database import get_db
 from app.models.user import User
 from app.models.campaign import Campaign, CampaignMember
 from app.dependencies.auth import get_current_user
-from app.schemas.campaign import CampaignCreate, CampaignResponse, CampaignUpdate
+from app.schemas.campaign import CampaignCreate, CampaignResponse, CampaignUpdate, CampaignMemberResponse
 from app.core.exceptions import NotFoundException, ForbiddenException, BadRequestException
 from app.schemas.user import UserResponse
 
@@ -161,3 +161,19 @@ def remove_member_from_campaign(campaign_id: int, user_id: int, db: Session = De
         "status": "success",
         "message": f"User {user_id} đã được xóa khỏi chiến dịch '{campaign.name}'"
     }
+
+@router.get("/{id}/members", response_model=list[CampaignMemberResponse])
+def list_campaign_members(campaign_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+    if not campaign:
+        raise NotFoundException("Chiến dịch không tồn tại")
+
+    is_owner = campaign.owner_id == current_user.id
+    is_member = (db.query(CampaignMember).filter(CampaignMember.campaign_id == campaign_id, CampaignMember.user_id == current_user.id).first() is not None)
+
+    if not (is_owner or is_member):
+        raise ForbiddenException("Bạn không phải thành viên của chiến dịch này")
+
+    members = (db.query(CampaignMember).filter(CampaignMember.campaign_id == campaign_id).all())
+
+    return members
