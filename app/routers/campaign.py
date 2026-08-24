@@ -137,3 +137,27 @@ def add_member_to_campaign(campaign_id: int, user_id: int, db: Session = Depends
     db.refresh(user)
 
     return user
+
+@router.delete("/{id}/members/{user_id}")
+def remove_member_from_campaign(campaign_id: int, user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+    if not campaign:
+        raise NotFoundException("Chiến dịch không tồn tại")
+
+    if campaign.owner_id != current_user.id:
+        raise ForbiddenException("Chỉ OWNER mới có quyền xóa thành viên")
+
+    member = (db.query(CampaignMember).filter(CampaignMember.campaign_id == campaign_id, CampaignMember.user_id == user_id).first())
+    if not member:
+        raise NotFoundException("Thành viên không tồn tại trong chiến dịch")
+
+    if user_id == campaign.owner_id:
+        raise BadRequestException("Không thể xóa OWNER cuối cùng của chiến dịch")
+
+    db.delete(member)
+    db.commit()
+
+    return {
+        "status": "success",
+        "message": f"User {user_id} đã được xóa khỏi chiến dịch '{campaign.name}'"
+    }
