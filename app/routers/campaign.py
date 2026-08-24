@@ -6,7 +6,8 @@ from app.models.user import User
 from app.models.campaign import Campaign, CampaignMember
 from app.dependencies.auth import get_current_user
 from app.schemas.campaign import CampaignCreate, CampaignResponse, CampaignUpdate
-from app.core.exceptions import NotFoundException, ForbiddenException
+from app.core.exceptions import NotFoundException, ForbiddenException, BadRequestException
+from app.schemas.user import UserResponse
 
 router = APIRouter(
     prefix="/campaigns",
@@ -108,3 +109,31 @@ def delete_campaign(campaign_id: int, db: Session = Depends(get_db), current_use
         "status": "success",
         "message": f"Chiến dịch '{campaign.name}' đã được xóa thành công",
     }
+
+@router.post("/{id}/members", response_model=UserResponse)
+def add_member_to_campaign(campaign_id: int, user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+    if not campaign:
+        raise NotFoundException("Chiến dịch không tồn tại")
+
+    if campaign.owner_id != current_user.id:
+        raise ForbiddenException("Chỉ OWNER mới có quyền thêm thành viên")
+
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise NotFoundException("User không tồn tại trên hệ thống!")
+
+    existing_member = (db.query(CampaignMember).filter(CampaignMember.campaign_id == campaign_id, CampaignMember.user_id == user_id).first())
+    if existing_member:
+        raise BadRequestException("User này đã là thành viên của chiến dịch")
+
+    new_member = CampaignMember(
+        campaign_id=campaign_id,
+        user_id=user_id,
+        role="MEMBER"
+    )
+    db.add(new_member)
+    db.commit()
+    db.refresh(user)
+
+    return user
