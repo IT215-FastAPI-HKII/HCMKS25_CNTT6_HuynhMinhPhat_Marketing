@@ -5,7 +5,7 @@ from app.db.database import get_db
 from app.models.user import User
 from app.models.campaign import Campaign, CampaignMember
 from app.dependencies.auth import get_current_user
-from app.schemas.campaign import CampaignCreate, CampaignResponse
+from app.schemas.campaign import CampaignCreate, CampaignResponse, CampaignUpdate
 from app.core.exceptions import NotFoundException, ForbiddenException
 
 router = APIRouter(
@@ -56,3 +56,55 @@ def get_campaign(campaign_id: int, db: Session = Depends(get_db), current_user: 
 
     campaign.owner = campaign.owner
     return campaign
+
+@router.put("/{id}", response_model=CampaignResponse)
+def replace_campaign(campaign_id: int, campaign_in: CampaignCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+    if not campaign:
+        raise NotFoundException("Chiến dịch không tồn tại")
+
+    if campaign.owner_id != current_user.id:
+        raise ForbiddenException("Chỉ OWNER mới có quyền sửa chiến dịch")
+
+    campaign.name = campaign_in.name
+    campaign.description = campaign_in.description
+
+    db.commit()
+    db.refresh(campaign)
+    return campaign
+
+@router.patch("/{id}", response_model=CampaignResponse)
+def update_campaign_partial(campaign_id: int, campaign_in: CampaignUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+    if not campaign:
+        raise NotFoundException("Chiến dịch không tồn tại")
+
+    if campaign.owner_id != current_user.id:
+        raise ForbiddenException("Chỉ OWNER mới có quyền sửa chiến dịch")
+    
+    if campaign_in.name is not None:
+        campaign.name = campaign_in.name
+
+    if campaign_in.description is not None:
+        campaign.description = campaign_in.description
+
+    db.commit()
+    db.refresh(campaign)
+    return campaign
+
+@router.delete("/{id}")
+def delete_campaign(campaign_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+    if not campaign:
+        raise NotFoundException("Chiến dịch không tồn tại")
+
+    if campaign.owner_id != current_user.id:
+        raise ForbiddenException("Chỉ OWNER mới có quyền xóa chiến dịch")
+
+    db.delete(campaign)
+    db.commit()
+
+    return {
+        "status": "success",
+        "message": f"Chiến dịch '{campaign.name}' đã được xóa thành công",
+    }
