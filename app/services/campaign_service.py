@@ -210,3 +210,16 @@ def create_campaign_task(db: Session, campaign_id: int, current_user: User, titl
     db.refresh(new_task)
 
     return new_task
+
+def list_campaign_tasks(db: Session, campaign_id: int, current_user: User):
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+    if not campaign:
+        raise NotFoundException("Chiến dịch không tồn tại")
+    
+    is_owner = campaign.owner_id == current_user.id
+    is_member = db.query(CampaignMember).filter(CampaignMember.campaign_id == campaign_id, CampaignMember.user_id == current_user.id).first() is not None
+    if not (is_owner or is_member):
+        raise ForbiddenException("Bạn không phải thành viên của chiến dịch này")
+
+    tasks = db.query(CampaignTask).filter(CampaignTask.campaign_id == campaign_id).all()
+    return tasks

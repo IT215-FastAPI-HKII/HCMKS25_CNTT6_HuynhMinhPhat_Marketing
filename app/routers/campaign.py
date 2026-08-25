@@ -60,3 +60,7 @@ def list_campaign_members(id: int, db: Session = Depends(get_db), current_user: 
 @router.post("/{id}/campaign-tasks", response_model=CampaignTaskResponse)
 def create_campaign_task(id: int, task_in: CampaignTaskCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return campaign_service.create_campaign_task(db, id, current_user, task_in.title, task_in.description, task_in.status, task_in.priority, task_in.due_date, task_in.assignee_id)
+
+@router.get("/{id}/campaign-tasks", response_model=list[CampaignTaskResponse])
+def list_campaign_tasks(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return campaign_service.list_campaign_tasks(db, id, current_user)
