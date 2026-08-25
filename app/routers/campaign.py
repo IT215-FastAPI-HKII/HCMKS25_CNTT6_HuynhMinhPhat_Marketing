@@ -7,6 +7,7 @@ from app.schemas.campaign import CampaignCreate, CampaignResponse, CampaignUpdat
 from app.schemas.user import UserResponse
 from app.services import campaign_service
 from app.schemas.campaign_task import CampaignTaskCreate, CampaignTaskResponse
+from typing import Optional
 
 router = APIRouter(
     prefix="/campaigns",
@@ -62,5 +63,5 @@ def create_campaign_task(id: int, task_in: CampaignTaskCreate, db: Session = Dep
     return campaign_service.create_campaign_task(db, id, current_user, task_in.title, task_in.description, task_in.status, task_in.priority, task_in.due_date, task_in.assignee_id)
 
 @router.get("/{id}/campaign-tasks", response_model=list[CampaignTaskResponse])
-def list_campaign_tasks(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return campaign_service.list_campaign_tasks(db, id, current_user)
+def get_campaign_tasks(campaign_id: int, status: Optional[str] = Query(None), priority: Optional[str] = Query(None), assignee_id: Optional[int] = Query(None), title: Optional[str] = Query(None), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return campaign_service.list_campaign_tasks(db=db, campaign_id=campaign_id, current_user=current_user, status=status, priority=priority, assignee_id=assignee_id, title=title)

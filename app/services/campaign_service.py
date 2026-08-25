@@ -211,7 +211,7 @@ def create_campaign_task(db: Session, campaign_id: int, current_user: User, titl
 
     return new_task
 
-def list_campaign_tasks(db: Session, campaign_id: int, current_user: User):
+def list_campaign_tasks(db: Session, campaign_id: int, current_user: User, status: str | None = None, priority: str | None = None, assignee_id: int | None = None, title: str | None = None):
     campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
     if not campaign:
         raise NotFoundException("Chiến dịch không tồn tại")
@@ -221,5 +221,20 @@ def list_campaign_tasks(db: Session, campaign_id: int, current_user: User):
     if not (is_owner or is_member):
         raise ForbiddenException("Bạn không phải thành viên của chiến dịch này")
 
-    tasks = db.query(CampaignTask).filter(CampaignTask.campaign_id == campaign_id).all()
+    query = db.query(CampaignTask).filter(CampaignTask.campaign_id == campaign_id)
+
+    if status:
+        query = query.filter(CampaignTask.status == status)
+
+    if priority:
+        query = query.filter(CampaignTask.priority == priority)
+
+    if assignee_id:
+        query = query.filter(CampaignTask.assignee_id == assignee_id)
+
+    if title:
+        query = query.filter(CampaignTask.title.ilike(f"%{title}%"))
+
+    tasks = query.all()
     return tasks
+
