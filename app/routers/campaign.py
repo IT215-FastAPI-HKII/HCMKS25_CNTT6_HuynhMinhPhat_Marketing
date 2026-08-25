@@ -63,7 +63,6 @@ def get_campaign(id: int, db: Session = Depends(get_db), current_user: User = De
     if not (is_owner or is_member):
         raise ForbiddenException("Bạn không phải thành viên của chiến dịch này")
 
-    campaign.owner = campaign.owner
     return campaign
 
 @router.put("/{id}", response_model=CampaignResponse)
@@ -132,6 +131,9 @@ def add_member_to_campaign(id: int, user_id: int, db: Session = Depends(get_db),
 
     if campaign.owner_id != current_user.id:
         raise ForbiddenException("Chỉ OWNER mới có quyền thêm thành viên")
+
+    if user_id == campaign.owner_id:
+        raise BadRequestException("Chủ sở hữu chiến dịch đã tự động có quyền, không thể thêm làm Member!")
 
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
