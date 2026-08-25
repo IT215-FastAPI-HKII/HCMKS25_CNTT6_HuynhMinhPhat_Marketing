@@ -62,6 +62,6 @@ def list_campaign_members(id: int, db: Session = Depends(get_db), current_user: 
 def create_campaign_task(id: int, task_in: CampaignTaskCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return campaign_service.create_campaign_task(db, id, current_user, task_in.title, task_in.description, task_in.status, task_in.priority, task_in.due_date, task_in.assignee_id)
 
-@router.get("/{id}/campaign-tasks", response_model=list[CampaignTaskResponse])
-def get_campaign_tasks(campaign_id: int, status: Optional[str] = Query(None), priority: Optional[str] = Query(None), assignee_id: Optional[int] = Query(None), title: Optional[str] = Query(None), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return campaign_service.list_campaign_tasks(db=db, campaign_id=campaign_id, current_user=current_user, status=status, priority=priority, assignee_id=assignee_id, title=title)
+@router.get("/campaigns/{id}/campaign-tasks", response_model=list[CampaignTaskResponse])
+def get_campaign_tasks(campaign_id: int, status: Optional[str] = Query(None), priority: Optional[str] = Query(None), assignee_id: Optional[int] = Query(None), title: Optional[str] = Query(None), limit: int = Query(10, ge=1), offset: int = Query(0, ge=0), sort_by: str = Query("created_at"), sort_order: str = Query("asc"), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return campaign_service.list_campaign_tasks(db=db, campaign_id=campaign_id, current_user=current_user, status=status, priority=priority, assignee_id=assignee_id, title=title, limit=limit, offset=offset, sort_by=sort_by, sort_order=sort_order)

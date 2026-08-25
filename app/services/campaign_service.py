@@ -211,7 +211,7 @@ def create_campaign_task(db: Session, campaign_id: int, current_user: User, titl
 
     return new_task
 
-def list_campaign_tasks(db: Session, campaign_id: int, current_user: User, status: str | None = None, priority: str | None = None, assignee_id: int | None = None, title: str | None = None):
+def list_campaign_tasks(db: Session, campaign_id: int, current_user: User, status: str | None = None, priority: str | None = None, assignee_id: int | None = None, title: str | None = None, limit: int = 10, offset: int = 0, sort_by: str = "created_at", sort_order: str = "asc"):
     campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
     if not campaign:
         raise NotFoundException("Chiến dịch không tồn tại")
@@ -235,6 +235,12 @@ def list_campaign_tasks(db: Session, campaign_id: int, current_user: User, statu
     if title:
         query = query.filter(CampaignTask.title.ilike(f"%{title}%"))
 
-    tasks = query.all()
+    sort_column = CampaignTask.created_at if sort_by == "created_at" else CampaignTask.due_date
+    if sort_order == "desc":
+        query = query.order_by(sort_column.desc())
+    else:
+        query = query.order_by(sort_column.asc())
+
+    tasks = query.limit(limit).offset(offset).all()
     return tasks
 
