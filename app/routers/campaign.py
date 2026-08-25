@@ -6,6 +6,7 @@ from app.dependencies.auth import get_current_user
 from app.schemas.campaign import CampaignCreate, CampaignResponse, CampaignUpdate, CampaignMemberResponse
 from app.schemas.user import UserResponse
 from app.services import campaign_service
+from app.schemas.campaign_task import CampaignTaskCreate, CampaignTaskResponse
 
 router = APIRouter(
     prefix="/campaigns",
@@ -55,3 +56,7 @@ def remove_member_from_campaign(id: int, user_id: int, db: Session = Depends(get
 @router.get("/{id}/members", response_model=list[CampaignMemberResponse])
 def list_campaign_members(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return campaign_service.list_members(db, id, current_user)
+
+@router.post("/{id}/campaign-tasks", response_model=CampaignTaskResponse)
+def create_campaign_task(id: int, task_in: CampaignTaskCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return campaign_service.create_campaign_task(db, id, current_user, task_in.title, task_in.description, task_in.status, task_in.priority, task_in.due_date, task_in.assignee_id)
