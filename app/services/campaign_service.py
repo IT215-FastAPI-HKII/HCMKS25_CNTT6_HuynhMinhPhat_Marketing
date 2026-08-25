@@ -51,7 +51,7 @@ def get_campaign(db: Session, campaign_id: int, current_user: User):
     is_member = db.query(CampaignMember).filter(CampaignMember.campaign_id == campaign_id, CampaignMember.user_id == current_user.id).first() is not None
 
     if not (is_owner or is_member):
-        raise ForbiddenException("Bạn không phải thành viên của chiến dịch này")
+        raise ForbiddenException("Bạn không có quyền xem task này")
 
     campaign.owner = campaign.owner
     return campaign
@@ -164,7 +164,7 @@ def list_members(db: Session, campaign_id: int, current_user: User):
     is_member = db.query(CampaignMember).filter(CampaignMember.campaign_id == campaign_id, CampaignMember.user_id == current_user.id).first() is not None
 
     if not (is_owner or is_member):
-        raise ForbiddenException("Bạn không phải thành viên của chiến dịch này")
+        raise ForbiddenException("Bạn không có quyền xem task này")
 
     members = db.query(CampaignMember).filter(CampaignMember.campaign_id == campaign_id).all()
 
@@ -180,7 +180,7 @@ def create_campaign_task(db: Session, campaign_id: int, current_user: User, titl
     is_owner = campaign.owner_id == current_user.id
     is_member = db.query(CampaignMember).filter(CampaignMember.campaign_id == campaign_id, CampaignMember.user_id == current_user.id).first() is not None
     if not (is_owner or is_member):
-        raise ForbiddenException("Bạn không phải thành viên của chiến dịch này")
+        raise ForbiddenException("Bạn không có quyền xem task này")
 
     if assignee_id and assignee_id > 0:
         assignee = db.query(User).filter(User.id == assignee_id).first()
@@ -219,7 +219,7 @@ def list_campaign_tasks(db: Session, campaign_id: int, current_user: User, statu
     is_owner = campaign.owner_id == current_user.id
     is_member = db.query(CampaignMember).filter(CampaignMember.campaign_id == campaign_id, CampaignMember.user_id == current_user.id).first() is not None
     if not (is_owner or is_member):
-        raise ForbiddenException("Bạn không phải thành viên của chiến dịch này")
+        raise ForbiddenException("Bạn không có quyền xem task này")
 
     query = db.query(CampaignTask).filter(CampaignTask.campaign_id == campaign_id)
 
