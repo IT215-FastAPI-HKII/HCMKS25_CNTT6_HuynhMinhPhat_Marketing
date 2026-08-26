@@ -1,5 +1,6 @@
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import IntegrityError
 
 class AppException(Exception):
     def __init__(self, message: str, status_code: int = status.HTTP_400_BAD_REQUEST):
@@ -43,6 +44,18 @@ async def general_exception_handler(request: Request, exc: Exception):
         content={
             "success": False,
             "message": "Internal server error",
+            "data": None,
+            "error": str(exc),
+        },
+    )
+
+
+async def db_integrity_exception_handler(request: Request, exc: IntegrityError):
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={
+            "success": False,
+            "message": "Dữ liệu vi phạm ràng buộc trong hệ thống (Integrity Constraint Failure)",
             "data": None,
             "error": str(exc),
         },

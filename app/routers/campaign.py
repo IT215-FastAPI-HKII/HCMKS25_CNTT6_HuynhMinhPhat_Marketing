@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models.user import User
 from app.dependencies.auth import get_current_user
-from app.schemas.campaign import CampaignCreate, CampaignResponse, CampaignUpdate, CampaignMemberResponse
+from app.schemas.campaign import CampaignCreate, CampaignResponse, CampaignUpdate, CampaignMemberResponse, AddMemberRequest
 from app.schemas.user import UserResponse
 from app.services import campaign_service
 from app.schemas.campaign_task import CampaignTaskCreate, CampaignTaskResponse
@@ -15,19 +15,11 @@ router = APIRouter(
 )
 
 @router.post("", response_model=CampaignResponse)
-def create_campaign(
-    campaign_in: CampaignCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
+def create_campaign(campaign_in: CampaignCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return campaign_service.create_campaign(db, current_user, campaign_in.name, campaign_in.description)
 
 @router.get("", response_model=list[CampaignResponse])
-def list_campaigns(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    name: str | None = Query(None)
-):
+def list_campaigns(db: Session = Depends(get_db), current_user: User = Depends(get_current_user), name: str | None = Query(None)):
     return campaign_service.list_campaigns(db, current_user, name)
 
 @router.get("/{id}", response_model=CampaignResponse)
@@ -47,8 +39,8 @@ def delete_campaign(id: int, db: Session = Depends(get_db), current_user: User =
     return campaign_service.delete_campaign(db, id, current_user)
 
 @router.post("/{id}/members", response_model=UserResponse)
-def add_member_to_campaign(id: int, user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return campaign_service.add_member(db, id, current_user, user_id)
+def add_member_to_campaign(id: int, payload: AddMemberRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return campaign_service.add_member(db, id, current_user, payload.user_id)
 
 @router.delete("/{id}/members/{user_id}")
 def remove_member_from_campaign(id: int, user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

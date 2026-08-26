@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from app.schemas.user import UserResponse
 from app.schemas.campaign_member import CampaignMemberResponse
 from app.schemas.campaign_task import CampaignTaskResponse
@@ -27,3 +27,6 @@ class CampaignResponse(CampaignBase):
 
     class Config:
         from_attributes = True
+
+class AddMemberRequest(BaseModel):
+    user_id: int = Field(..., gt=0)

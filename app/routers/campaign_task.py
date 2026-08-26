@@ -17,5 +17,11 @@ def update_campaign_task(task_id: int, task_in: CampaignTaskUpdate, db: Session 
     return campaign_task_service.update_campaign_task(db, task_id, current_user, task_in)
 
 @router.delete("/{id}")
-def delete_campaign_task(task_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return campaign_task_service.delete_campaign_task(db, task_id, current_user)
+def delete_campaign_task(campaign_id: int, task_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    task_title = campaign_task_service.delete_campaign_task(db, campaign_id, task_id, current_user)
+    return {
+        "success": True,
+        "message": f"Nhiệm vụ '{task_title}' đã được xóa thành công",
+        "data": None,
+        "error": None,
+    }
