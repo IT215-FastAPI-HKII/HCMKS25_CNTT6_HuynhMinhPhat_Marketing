@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from app.models.user import User
 from app.dependencies.auth import get_current_user
 from app.dependencies.role import RoleChecker
@@ -11,7 +11,7 @@ router = APIRouter(
     tags=["Users"]
 )
 
-@router.get("/admin")
+@router.get("/admin", summary="Thông tin ẩn [ADMIN]", status_code=status.HTTP_200_OK)
 def get_admin(current_user: User = Depends(RoleChecker(["ADMIN"]))):
     return {
         "status": "success",
@@ -19,7 +19,7 @@ def get_admin(current_user: User = Depends(RoleChecker(["ADMIN"]))):
         "secret_data": "Hello tôi là super admin đây :>!"
     }
 
-@router.get("/me")
+@router.get("/me", summary="Thông tin người dùng hiện tại", status_code=status.HTTP_200_OK)
 def read_current_user(current_user: User = Depends(get_current_user)):
     return {
         "id": current_user.id,
@@ -30,7 +30,7 @@ def read_current_user(current_user: User = Depends(get_current_user)):
         "created_at": current_user.created_at
     }
 
-@router.get("")
+@router.get("", summary="Lấy danh sách người dùng [ADMIN]", status_code=status.HTTP_200_OK)
 def list_users(db: Session = Depends(get_db), current_user: User = Depends(RoleChecker(["ADMIN"])), name: str | None = None, email: str | None = None, is_active: bool | None = None):
     search = db.query(User)
     if name:

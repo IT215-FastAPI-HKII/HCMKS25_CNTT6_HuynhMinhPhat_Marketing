@@ -15,7 +15,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Marketing Campaign Management API")
 
-@app.get("/")
+@app.get("/", summary="Test Connect", status_code=status.HTTP_200_OK)
 def root():
     return {"message": "Chào mừng đến với Marketing Campaign Management API!"}
 
